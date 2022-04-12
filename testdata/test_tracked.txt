@@ -1,0 +1,4 @@
+testdata/test_tracked.txt|2022-04-12 16:49:07.196231996 +0300 +03|Created
+images/checkout-example.png|2022-04-12 08:20:09.723595908 +0300 +03|Created
+images/directory-arch.png|2022-04-12 08:20:09.723595908 +0300 +03|Created
+go.mod|2022-04-12 12:35:01.344508354 +0300 +03|Created
