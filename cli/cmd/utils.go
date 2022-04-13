@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -19,7 +21,7 @@ func checkPathExists(path string) (bool, error) {
 }
 
 func createDirectory(dirName string) error {
-	return os.Mkdir(dirName, os.ModePerm)
+	return os.MkdirAll(dirName, os.ModePerm)
 }
 
 func createFile(name string) error {
@@ -58,4 +60,14 @@ func getNumberOfChildrenDir(path string) (int, error) {
 		return 0, err
 	}
 	return len(files), nil
+}
+
+func runShellCommand(command string) (error, string, string) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	return err, stdout.String(), stderr.String()
 }

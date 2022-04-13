@@ -72,13 +72,13 @@ func runCommitCommand(trackedFilePath, msg string) error {
 		if exist {
 			// TODO: Instead of new copy of the fresh file, we can copy only changes and apply them
 		}
-
 		destinationFilePtr, _ := createNestedFile(destCommitFilePath)
 		originalFilePtr, _ := os.Open(file.Name)
 		_, _ = io.Copy(destinationFilePtr, originalFilePtr)
 
 		originalFilePtr.Close()
 		destinationFilePtr.Close()
+
 	}
 
 	stagingFilePtr, _ := openFile(stagingAreaFilePath)

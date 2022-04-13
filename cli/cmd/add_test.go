@@ -12,7 +12,7 @@ const (
 
 func Test_runAddCommand(t *testing.T) {
 	files := []string{"testdata/z.go"}
-	err := runAddCommand(testTrackedFile, files)
+	err := runAddCommand(statusFilePath, files)
 	assert.Nil(t, err)
 }
 

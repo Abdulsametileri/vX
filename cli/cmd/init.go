@@ -14,6 +14,7 @@ var (
 const (
 	vxRootDirName        = ".vx"
 	vxCommitDirName      = ".vx/commit"
+	vxCheckoutDirName    = ".vx/checkout"
 	vxFirstCommitDirName = ".vx/commit/v1"
 	vxStatusFileName     = ".vx/status.txt"
 	vxStagingFileName    = ".vx/staging-area.txt"

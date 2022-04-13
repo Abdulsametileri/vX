@@ -35,7 +35,7 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 		fileInfo, _ := os.Stat(filePath)
 
 		if fileInfo.IsDir() {
-			traverseDirectory(filePath, fileNameToMetadata, fileInfo)
+			traverseDirectory(filePath, fileNameToMetadata)
 		} else {
 			extractFileMetadata(fileNameToMetadata, filePath, fileInfo.ModTime().String())
 		}
@@ -53,21 +53,23 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 	}
 
 	for fileName, metadata := range fileNameToMetadata {
-		lineStr := fmt.Sprintf("%s|%s|%s\n", fileName,
-			metadata.ModificationTime, string(metadata.Status))
-		statusFilePtr.WriteString(lineStr)
+		lineStr := fmt.Sprintf(
+			"%s|%s|%s\n", fileName, metadata.ModificationTime, string(metadata.Status),
+		)
+
+		_, _ = statusFilePtr.WriteString(lineStr)
 		if metadata.GoToStaging {
-			stagingFilePtr.WriteString(lineStr)
+			_, _ = stagingFilePtr.WriteString(lineStr)
 		}
 	}
 
 	return nil
 }
 
-func traverseDirectory(arg string, fileNameToMetadata fileNameToMetadataMap, fileInfo os.FileInfo) {
+func traverseDirectory(arg string, fileNameToMetadata fileNameToMetadataMap) {
 	_ = filepath.Walk(arg, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
-			extractFileMetadata(fileNameToMetadata, path, fileInfo.ModTime().String())
+			extractFileMetadata(fileNameToMetadata, path, info.ModTime().String())
 		}
 		return nil
 	})

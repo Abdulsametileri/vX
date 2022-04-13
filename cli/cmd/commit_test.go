@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func Test_runCommitCommand(t *testing.T) {
 	err := runCommitCommand(stagingAreaFilePath, "first commit")
-	fmt.Println(err)
+	assert.Nil(t, err)
 }
