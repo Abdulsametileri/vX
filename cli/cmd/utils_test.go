@@ -10,7 +10,7 @@ func Test_checkDirectoryExists(t *testing.T) {
 	dirName := ".vx-test"
 
 	t.Run("return false when directory is not exist", func(t *testing.T) {
-		exists, err := checkDirectoryExists(dirName)
+		exists, err := checkPathExists(dirName)
 		assert.Nil(t, err)
 		assert.False(t, exists)
 	})
@@ -22,7 +22,7 @@ func Test_checkDirectoryExists(t *testing.T) {
 		}
 		defer removeDirectory(dirName)
 
-		exists, err := checkDirectoryExists(dirName)
+		exists, err := checkPathExists(dirName)
 		assert.True(t, exists)
 		assert.Nil(t, err)
 	})

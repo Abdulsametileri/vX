@@ -2,18 +2,12 @@ package cmd
 
 import (
 	"bufio"
-	"io"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-)
-
-var (
-	trackedFilesPath = filepath.Join(vxRootDirName, "status.txt")
-	separator        = "|"
-	newLine          = "\n"
 )
 
 type fileNameToMetadataMap map[string]fileMetadata
@@ -27,38 +21,45 @@ var addCmd = &cobra.Command{
 	Short:   "This allows you to track all file status (created, modified, deleted)",
 	Example: "vx add main.go images/",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runAddCommand(trackedFilesPath, args)
+		return runAddCommand(stagingAreaFilePath, args)
 	},
 }
 
-func runAddCommand(filePath string, args []string) error {
-	trackedFilePtr, err := openFile(filePath)
-	if err != nil {
-		return err
-	}
-	defer trackedFilePtr.Close()
-
-	fileNameToMetadata, err := createFileNameToMetadataMap(trackedFilePtr)
+func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
+	fileNameToMetadata, err := createFileNameToMetadataMap(statusFilePath)
 	if err != nil {
 		return err
 	}
 
-	for _, arg := range args {
-		fileInfo, _ := os.Stat(arg)
+	for _, filePath := range filePaths {
+		fileInfo, _ := os.Stat(filePath)
 
 		if fileInfo.IsDir() {
-			traverseDirectory(arg, fileNameToMetadata, fileInfo)
+			traverseDirectory(filePath, fileNameToMetadata, fileInfo)
 		} else {
-			extractFileMetadata(fileNameToMetadata, fileInfo.Name(), fileInfo.ModTime().String())
+			extractFileMetadata(fileNameToMetadata, filePath, fileInfo.ModTime().String())
 		}
 	}
 
-	err = clearFileContent(trackedFilePtr)
+	statusFilePtr, _ := openFile(statusFilePath)
+	defer statusFilePtr.Close()
+
+	stagingFilePtr, _ := openFileAppendMode(stagingAreaFilePath)
+	defer stagingFilePtr.Close()
+
+	err = clearFileContent(statusFilePtr)
 	if err != nil {
 		return err
 	}
 
-	writeContentsToFile(trackedFilePtr, fileNameToMetadata)
+	for fileName, metadata := range fileNameToMetadata {
+		lineStr := fmt.Sprintf("%s|%s|%s\n", fileName,
+			metadata.ModificationTime, string(metadata.Status))
+		statusFilePtr.WriteString(lineStr)
+		if metadata.GoToStaging {
+			stagingFilePtr.WriteString(lineStr)
+		}
+	}
 
 	return nil
 }
@@ -72,29 +73,37 @@ func traverseDirectory(arg string, fileNameToMetadata fileNameToMetadataMap, fil
 	})
 }
 
-func extractFileMetadata(fileNameToMetadata fileNameToMetadataMap, fileName, fileCurrModTime string) {
-	metadata, ok := fileNameToMetadata[fileName]
+func extractFileMetadata(fileNameToMetadata fileNameToMetadataMap, filePath, fileCurrModTime string) {
+	metadata, ok := fileNameToMetadata[filePath]
 	if ok {
 		if fileCurrModTime != metadata.ModificationTime {
-			fileNameToMetadata[fileName] = fileMetadata{
-				Name:             fileName,
+			fileNameToMetadata[filePath] = fileMetadata{
+				Name:             filePath,
 				Status:           StatusUpdated,
 				ModificationTime: fileCurrModTime,
+				GoToStaging:      true,
 			}
 		}
 	} else {
-		fileNameToMetadata[fileName] = fileMetadata{
-			Name:             fileName,
+		fileNameToMetadata[filePath] = fileMetadata{
+			Name:             filePath,
 			Status:           StatusCreated,
 			ModificationTime: fileCurrModTime,
+			GoToStaging:      true,
 		}
 	}
 }
 
-func createFileNameToMetadataMap(reader io.Reader) (fileNameToMetadataMap, error) {
-	scanner := bufio.NewScanner(reader)
-
+func createFileNameToMetadataMap(filePath string) (fileNameToMetadataMap, error) {
 	fileNameToModification := make(fileNameToMetadataMap)
+
+	trackedFilePtr, err := openFile(filePath)
+	if err != nil {
+		return fileNameToModification, err
+	}
+	defer trackedFilePtr.Close()
+
+	scanner := bufio.NewScanner(trackedFilePtr)
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -102,22 +111,10 @@ func createFileNameToMetadataMap(reader io.Reader) (fileNameToMetadataMap, error
 		fileNameToModification[fm.Name] = fm
 	}
 
-	err := scanner.Err()
+	err = scanner.Err()
 	if err != nil {
 		return fileNameToModification, err
 	}
 
 	return fileNameToModification, nil
-}
-
-//nolint:errcheck
-func writeContentsToFile(filePtr *os.File, fileNameToMetadata fileNameToMetadataMap) {
-	for fileName, metadata := range fileNameToMetadata {
-		filePtr.WriteString(fileName)
-		filePtr.WriteString(separator)
-		filePtr.WriteString(metadata.ModificationTime)
-		filePtr.WriteString(separator)
-		filePtr.WriteString(string(metadata.Status))
-		filePtr.WriteString(newLine)
-	}
 }

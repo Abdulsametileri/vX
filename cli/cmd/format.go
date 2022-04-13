@@ -13,10 +13,11 @@ type fileMetadata struct {
 	Name             string
 	Status           FileStatus
 	ModificationTime string
+	GoToStaging      bool
 }
 
 func extractDataFromFile(lineStr string) fileMetadata {
-	structure := strings.Split(lineStr, separator)
+	structure := strings.Split(lineStr, "|")
 	return fileMetadata{
 		Name:             structure[0],
 		ModificationTime: structure[1],

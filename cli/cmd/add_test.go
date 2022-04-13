@@ -11,15 +11,12 @@ const (
 )
 
 func Test_runAddCommand(t *testing.T) {
-	files := []string{"go.mod", "testdata", "images"}
+	files := []string{"testdata/z.go"}
 	err := runAddCommand(testTrackedFile, files)
 	assert.Nil(t, err)
 }
 
 func Test_CreateFileNameToModificationMap(t *testing.T) {
-	filePtr, _ := openFile(testTrackedFile)
-	defer filePtr.Close()
-
 	expectedMap := fileNameToMetadataMap{
 		"go.mod": fileMetadata{
 			Status:           "Created",
@@ -31,7 +28,7 @@ func Test_CreateFileNameToModificationMap(t *testing.T) {
 		},
 	}
 
-	m, err := createFileNameToMetadataMap(filePtr)
+	m, err := createFileNameToMetadataMap(testTrackedFile)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedMap, m)
 }

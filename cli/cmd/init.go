@@ -2,12 +2,21 @@ package cmd
 
 import (
 	"errors"
-
 	"github.com/spf13/cobra"
+	"path/filepath"
+)
+
+var (
+	statusFilePath      = filepath.Join(vxRootDirName, "status.txt")
+	stagingAreaFilePath = filepath.Join(vxRootDirName, "staging-area.txt")
 )
 
 const (
-	vxRootDirName = ".vx"
+	vxRootDirName        = ".vx"
+	vxCommitDirName      = ".vx/commit"
+	vxFirstCommitDirName = ".vx/commit/v1"
+	vxStatusFileName     = ".vx/status.txt"
+	vxStagingFileName    = ".vx/staging-area.txt"
 )
 
 func init() {
@@ -24,7 +33,7 @@ var initCmd = &cobra.Command{
 }
 
 func runInitCommand() error {
-	exists, err := checkDirectoryExists(vxRootDirName)
+	exists, err := checkPathExists(vxRootDirName)
 	if err != nil {
 		return err
 	}
@@ -32,9 +41,21 @@ func runInitCommand() error {
 		return errors.New("vx root directory is already exist")
 	}
 
-	err = createDirectory(vxRootDirName)
-	if err != nil {
+	if err = createDirectory(vxRootDirName); err != nil {
 		return err
 	}
+
+	if err = createDirectory(vxCommitDirName); err != nil {
+		return err
+	}
+
+	if err = createFile(vxStatusFileName); err != nil {
+		return err
+	}
+
+	if err = createFile(vxStagingFileName); err != nil {
+		return err
+	}
+
 	return nil
 }

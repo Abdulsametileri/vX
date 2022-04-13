@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"bufio"
+	"fmt"
+	"github.com/olekukonko/tablewriter"
+	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"sort"
-
-	"github.com/olekukonko/tablewriter"
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -19,7 +19,7 @@ var statusCmd = &cobra.Command{
 	Short:   "This allows you to display all tracked files status",
 	Example: "vx status",
 	RunE: func(_ *cobra.Command, _ []string) error {
-		return runStatusCommand(os.Stdout, trackedFilesPath)
+		return runStatusCommand(os.Stdout, stagingAreaFilePath)
 	},
 }
 
@@ -36,10 +36,16 @@ func runStatusCommand(writer io.Writer, trackedFilePath string) error {
 }
 
 func displayResults(writer io.Writer, allMetadata []fileMetadata) {
+	if len(allMetadata) == 0 {
+		fmt.Fprintln(writer, "No Changes!")
+		return
+	}
+
 	// TODO: Status Created = Green, Status Updated = Blue
 	table := tablewriter.NewWriter(writer)
 	table.SetHeader([]string{"File name", "Status", "Last Modification Time"})
 	table.SetRowLine(true)
+	// TODO: Modification time format
 	for _, mt := range allMetadata {
 		table.Append([]string{mt.Name, string(mt.Status), mt.ModificationTime})
 		table.SetRowLine(true)
@@ -54,11 +60,17 @@ func getAllDataFromTrackedFile(trackedFilePath string) ([]fileMetadata, error) {
 	}
 	defer filePtr.Close()
 
-	var allMetadata []fileMetadata
+	updateLatestStateMap := make(map[string]fileMetadata)
 
 	scanner := bufio.NewScanner(filePtr)
 	for scanner.Scan() {
-		allMetadata = append(allMetadata, extractDataFromFile(scanner.Text()))
+		mData := extractDataFromFile(scanner.Text())
+		updateLatestStateMap[mData.Name] = mData
+	}
+
+	var allMetadata []fileMetadata
+	for _, v := range updateLatestStateMap {
+		allMetadata = append(allMetadata, v)
 	}
 
 	sort.Slice(allMetadata, func(i, j int) bool {
