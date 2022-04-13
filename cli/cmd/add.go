@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -37,7 +38,7 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 		if fileInfo.IsDir() {
 			traverseDirectory(filePath, fileNameToMetadata)
 		} else {
-			extractFileMetadata(fileNameToMetadata, filePath, fileInfo.ModTime().String())
+			extractFileMetadata(fileNameToMetadata, filePath, fileInfo.ModTime())
 		}
 	}
 
@@ -69,20 +70,22 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 func traverseDirectory(arg string, fileNameToMetadata fileNameToMetadataMap) {
 	_ = filepath.Walk(arg, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
-			extractFileMetadata(fileNameToMetadata, path, info.ModTime().String())
+			extractFileMetadata(fileNameToMetadata, path, info.ModTime())
 		}
 		return nil
 	})
 }
 
-func extractFileMetadata(fileNameToMetadata fileNameToMetadataMap, filePath, fileCurrModTime string) {
+func extractFileMetadata(fileNameToMetadata fileNameToMetadataMap, filePath string, fileCurrModTime time.Time) {
+	fileCurModTimeStr := fileCurrModTime.Format(vxTimeFormat)
+
 	metadata, ok := fileNameToMetadata[filePath]
 	if ok {
-		if fileCurrModTime != metadata.ModificationTime {
+		if fileCurModTimeStr != metadata.ModificationTime {
 			fileNameToMetadata[filePath] = fileMetadata{
 				Name:             filePath,
 				Status:           StatusUpdated,
-				ModificationTime: fileCurrModTime,
+				ModificationTime: fileCurModTimeStr,
 				GoToStaging:      true,
 			}
 		}
@@ -90,7 +93,7 @@ func extractFileMetadata(fileNameToMetadata fileNameToMetadataMap, filePath, fil
 		fileNameToMetadata[filePath] = fileMetadata{
 			Name:             filePath,
 			Status:           StatusCreated,
-			ModificationTime: fileCurrModTime,
+			ModificationTime: fileCurModTimeStr,
 			GoToStaging:      true,
 		}
 	}

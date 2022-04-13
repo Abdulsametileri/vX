@@ -1,16 +1,17 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
-
-	"github.com/spf13/cobra"
+	"time"
 )
 
 func init() {
 	changeWorkingDirectoryToRootDir()
+	changeGlobalTimeToUTC()
 }
 
 var rootCmd = &cobra.Command{
@@ -29,5 +30,12 @@ func changeWorkingDirectoryToRootDir() {
 	err := os.Chdir(filepath.Join(filepath.Dir(filename), "..", ".."))
 	if err != nil {
 		panic(err)
+	}
+}
+
+func changeGlobalTimeToUTC() {
+	loc, err := time.LoadLocation("UTC")
+	if err == nil {
+		time.Local = loc
 	}
 }

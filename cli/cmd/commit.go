@@ -42,7 +42,7 @@ func createCommitMetadataFile(commitDirName, commitMsg string) error {
 
 	_, _ = msgFilePtr.WriteString(commitMsg)
 	_, _ = msgFilePtr.WriteString("|")
-	_, _ = msgFilePtr.WriteString(time.Now().String())
+	_, _ = msgFilePtr.WriteString(time.Now().Format(vxTimeFormat))
 
 	return nil
 }

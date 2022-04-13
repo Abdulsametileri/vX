@@ -30,26 +30,34 @@ func runStatusCommand(writer io.Writer, trackedFilePath string) error {
 		return err
 	}
 
-	displayResults(writer, allMetadata)
+	displayStatus(writer, allMetadata)
 
 	return nil
 }
 
-func displayResults(writer io.Writer, allMetadata []fileMetadata) {
+func displayStatus(writer io.Writer, allMetadata []fileMetadata) {
 	if len(allMetadata) == 0 {
 		fmt.Fprintln(writer, "No Changes!")
 		return
 	}
 
-	// TODO: Status Created = Green, Status Updated = Blue
 	table := tablewriter.NewWriter(writer)
 	table.SetHeader([]string{"File name", "Status", "Last Modification Time"})
-	table.SetRowLine(true)
-	// TODO: Modification time format
+	table.SetHeaderColor(
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor},
+	)
+
 	for _, mt := range allMetadata {
-		table.Append([]string{mt.Name, string(mt.Status), mt.ModificationTime})
-		table.SetRowLine(true)
+		row := []string{mt.Name, string(mt.Status), mt.ModificationTime}
+		statusColor := tablewriter.FgGreenColor
+		if mt.Status == StatusUpdated {
+			statusColor = tablewriter.FgBlueColor
+		}
+		table.Rich(row, []tablewriter.Colors{{}, {tablewriter.Bold, statusColor}, {}})
 	}
+
 	table.Render()
 }
 

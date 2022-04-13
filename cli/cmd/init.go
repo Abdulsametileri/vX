@@ -18,6 +18,7 @@ const (
 	vxFirstCommitDirName = ".vx/commit/v1"
 	vxStatusFileName     = ".vx/status.txt"
 	vxStagingFileName    = ".vx/staging-area.txt"
+	vxTimeFormat         = "2006-01-02 03:04:05"
 )
 
 func init() {
