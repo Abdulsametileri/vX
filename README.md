@@ -1,6 +1,6 @@
 # vX
 
-**vX** is a very basic version control system.
+**vX** is a very basic version control system. For details at my medium blog [How was I build a version control system (VCS) using pure Go 🚀](https://abdulsamet-ileri.medium.com/how-was-i-build-a-version-control-system-vcs-using-pure-go-83ec8ec5d4f4)
 
 # Demo
 
