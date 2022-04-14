@@ -2,6 +2,10 @@
 
 **vX** is a very basic version control system.
 
+# Demo
+
+[![asciicast](https://asciinema.org/a/487303.svg)](https://asciinema.org/a/487303)
+
 # vX Commands
 
 All commands: `init`, `add`, `status`, `commit`, `checkout`, `history`
