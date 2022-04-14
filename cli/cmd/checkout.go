@@ -3,9 +3,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -41,25 +43,25 @@ func runCheckoutCommand(args []string) error {
 
 	if exist, err := isCheckoutFolderAlreadyExist(commitVersion); err != nil {
 		return err
-	} else if exist {
-		fmt.Println("Checkout file is already exist :)")
+	} else if exist { // checkout version folder already exist no need to do operation
 		return nil
 	}
 
-	checkoutFilePath := filepath.Join(vxCheckoutDirName, commitVersion)
+	checkoutFilePath := filepath.Join(vxCheckoutDirPath, commitVersion)
 	if err := createDirectory(checkoutFilePath); err != nil {
 		return err
 	}
 
 	var commands []string
 
-	dirCount, err := getNumberOfChildrenDir(vxCommitDirName)
+	dirCount, err := getNumberOfChildrenDir(vxCommitDirPath)
 	if err != nil {
 		return err
 	}
 
+	// Copy and merge all the changes from first version to given commit version
 	for i := 1; i <= dirCount; i++ {
-		vNo := fmt.Sprintf("v%d", i)
+		vNo := getDirNameUsingVersion(i)
 		cmd := fmt.Sprintf("rsync -a .vx/commit/%s/ %s --exclude=metadata.txt", vNo, checkoutFilePath)
 		commands = append(commands, cmd)
 
@@ -69,11 +71,13 @@ func runCheckoutCommand(args []string) error {
 	}
 
 	for _, command := range commands {
-		commandStatus, _, stdErr := runShellCommand(command)
+		stdErr, _, commandStatus := runShellCommand(command)
 		if commandStatus != nil {
 			return errors.New(stdErr)
 		}
 	}
+
+	color.Green("All files merged in %s directory!", checkoutFilePath)
 
 	return nil
 }
@@ -86,7 +90,7 @@ func checkCommitVersionIsSpecified(args []string) error {
 }
 
 func isValidCommitVersion(commitVersion string) (bool, error) {
-	dir, err := os.ReadDir(vxCommitDirName)
+	dir, err := os.ReadDir(vxCommitDirPath)
 	if err != nil {
 		return false, err
 	}

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -11,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type fileNameToMetadataMap map[string]fileMetadata
+type filePathToMetadataMap map[string]fileMetadata
 
 func init() {
 	rootCmd.AddCommand(addCmd)
@@ -19,7 +18,7 @@ func init() {
 
 var addCmd = &cobra.Command{
 	Use:     "add",
-	Short:   "This allows you to track all file status (created, modified, deleted)",
+	Short:   "This allows you to track all file status (created, modified)",
 	Example: "vx add main.go images/",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runAddCommand(stagingAreaFilePath, args)
@@ -32,15 +31,7 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 		return err
 	}
 
-	for _, filePath := range filePaths {
-		fileInfo, _ := os.Stat(filePath)
-
-		if fileInfo.IsDir() {
-			traverseDirectory(filePath, fileNameToMetadata)
-		} else {
-			extractFileMetadata(fileNameToMetadata, filePath, fileInfo.ModTime())
-		}
-	}
+	determineStagingAreaFiles(filePaths, fileNameToMetadata)
 
 	statusFilePtr, _ := openFile(statusFilePath)
 	defer statusFilePtr.Close()
@@ -48,15 +39,13 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 	stagingFilePtr, _ := openFileAppendMode(stagingAreaFilePath)
 	defer stagingFilePtr.Close()
 
-	err = clearFileContent(statusFilePtr)
-	if err != nil {
+	// we need to truncate status folder in order to catch overwrite file status
+	if err := clearFileContent(statusFilePtr); err != nil {
 		return err
 	}
 
-	for fileName, metadata := range fileNameToMetadata {
-		lineStr := fmt.Sprintf(
-			"%s|%s|%s\n", fileName, metadata.ModificationTime, string(metadata.Status),
-		)
+	for _, metadata := range fileNameToMetadata {
+		lineStr := metadata.toFormatFileMetadataForFile()
 
 		_, _ = statusFilePtr.WriteString(lineStr)
 		if metadata.GoToStaging {
@@ -67,7 +56,19 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 	return nil
 }
 
-func traverseDirectory(arg string, fileNameToMetadata fileNameToMetadataMap) {
+func determineStagingAreaFiles(filePaths []string, fileNameToMetadata filePathToMetadataMap) {
+	for _, filePath := range filePaths {
+		fileInfo, _ := os.Stat(filePath)
+
+		if fileInfo.IsDir() {
+			traverseDirectory(filePath, fileNameToMetadata)
+		} else {
+			extractFileMetadata(fileNameToMetadata, filePath, fileInfo.ModTime())
+		}
+	}
+}
+
+func traverseDirectory(arg string, fileNameToMetadata filePathToMetadataMap) {
 	_ = filepath.Walk(arg, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
 			extractFileMetadata(fileNameToMetadata, path, info.ModTime())
@@ -76,49 +77,42 @@ func traverseDirectory(arg string, fileNameToMetadata fileNameToMetadataMap) {
 	})
 }
 
-func extractFileMetadata(fileNameToMetadata fileNameToMetadataMap, filePath string, fileCurrModTime time.Time) {
+func extractFileMetadata(fileNameToMetadata filePathToMetadataMap, filePath string, fileCurrModTime time.Time) {
 	fileCurModTimeStr := fileCurrModTime.Format(vxTimeFormat)
-
 	metadata, ok := fileNameToMetadata[filePath]
-	if ok {
-		if fileCurModTimeStr != metadata.ModificationTime {
-			fileNameToMetadata[filePath] = fileMetadata{
-				Name:             filePath,
-				Status:           StatusUpdated,
-				ModificationTime: fileCurModTimeStr,
-				GoToStaging:      true,
-			}
-		}
-	} else {
-		fileNameToMetadata[filePath] = fileMetadata{
-			Name:             filePath,
-			Status:           StatusCreated,
-			ModificationTime: fileCurModTimeStr,
-			GoToStaging:      true,
-		}
+
+	mStruct := fileMetadata{
+		Path:             filePath,
+		ModificationTime: fileCurModTimeStr,
+		GoToStaging:      true,
+		Status:           StatusCreated,
 	}
+
+	if ok && fileCurModTimeStr != metadata.ModificationTime {
+		mStruct.Status = StatusUpdated
+	}
+
+	fileNameToMetadata[filePath] = mStruct
 }
 
-func createFileNameToMetadataMap(filePath string) (fileNameToMetadataMap, error) {
-	fileNameToModification := make(fileNameToMetadataMap)
-
+func createFileNameToMetadataMap(filePath string) (filePathToMetadataMap, error) {
 	trackedFilePtr, err := openFile(filePath)
 	if err != nil {
-		return fileNameToModification, err
+		return nil, err
 	}
 	defer trackedFilePtr.Close()
 
-	scanner := bufio.NewScanner(trackedFilePtr)
+	fileNameToModification := make(filePathToMetadataMap)
 
+	scanner := bufio.NewScanner(trackedFilePtr)
 	for scanner.Scan() {
 		line := scanner.Text()
-		fm := extractDataFromFile(line)
-		fileNameToModification[fm.Name] = fm
+		fm := extractFileMetadataFromLine(line)
+		fileNameToModification[fm.Path] = fm
 	}
 
-	err = scanner.Err()
-	if err != nil {
-		return fileNameToModification, err
+	if err := scanner.Err(); err != nil {
+		return nil, err
 	}
 
 	return fileNameToModification, nil

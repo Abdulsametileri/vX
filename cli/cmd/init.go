@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"errors"
-	"github.com/spf13/cobra"
 	"path/filepath"
+
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -12,13 +14,13 @@ var (
 )
 
 const (
-	vxRootDirName        = ".vx"
-	vxCommitDirName      = ".vx/commit"
-	vxCheckoutDirName    = ".vx/checkout"
-	vxFirstCommitDirName = ".vx/commit/v1"
-	vxStatusFileName     = ".vx/status.txt"
-	vxStagingFileName    = ".vx/staging-area.txt"
-	vxTimeFormat         = "2006-01-02 03:04:05"
+	vxRootDirName            = ".vx"
+	vxCommitDirPath          = ".vx/commit"
+	vxCheckoutDirPath        = ".vx/checkout"
+	vxStatusFilePath         = ".vx/status.txt"
+	vxStagingFilePath        = ".vx/staging-area.txt"
+	vxTimeFormat             = "2006-01-02 03:04:05"
+	vxCommitMetadataFileName = "metadata.txt"
 )
 
 func init() {
@@ -35,29 +37,25 @@ var initCmd = &cobra.Command{
 }
 
 func runInitCommand() error {
-	exists, err := checkPathExists(vxRootDirName)
-	if err != nil {
+	if exists, err := checkPathExists(vxRootDirName); err != nil {
 		return err
-	}
-	if exists {
+	} else if exists {
 		return errors.New("vx root directory is already exist")
 	}
 
-	if err = createDirectory(vxRootDirName); err != nil {
+	if err := createDirectories(vxRootDirName, vxCommitDirPath, vxCheckoutDirPath); err != nil {
 		return err
 	}
 
-	if err = createDirectory(vxCommitDirName); err != nil {
+	if err := createFile(vxStatusFilePath); err != nil {
 		return err
 	}
 
-	if err = createFile(vxStatusFileName); err != nil {
+	if err := createFile(vxStagingFilePath); err != nil {
 		return err
 	}
 
-	if err = createFile(vxStagingFileName); err != nil {
-		return err
-	}
+	color.Green("All files are initialized within .vx/ directory!")
 
 	return nil
 }

@@ -20,6 +20,15 @@ func checkPathExists(path string) (bool, error) {
 	return false, err
 }
 
+func createDirectories(dirs ...string) error {
+	for _, dir := range dirs {
+		if err := createDirectory(dir); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func createDirectory(dirName string) error {
 	return os.MkdirAll(dirName, os.ModePerm)
 }
@@ -62,12 +71,14 @@ func getNumberOfChildrenDir(path string) (int, error) {
 	return len(files), nil
 }
 
-func runShellCommand(command string) (error, string, string) {
+func runShellCommand(command string) (stderrMsg, stdoutMsg string, cmdResult error) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
+
 	cmd := exec.Command("bash", "-c", command)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
-	return err, stdout.String(), stderr.String()
+
+	return stderr.String(), stdout.String(), err
 }

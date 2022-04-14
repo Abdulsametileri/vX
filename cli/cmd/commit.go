@@ -3,11 +3,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -33,27 +34,13 @@ var commitCmd = &cobra.Command{
 	},
 }
 
-func createCommitMetadataFile(commitDirName, commitMsg string) error {
-	msgFilePtr, err := createNestedFile(filepath.Join(commitDirName, "metadata.txt"))
-	if err != nil {
-		return err
-	}
-	defer msgFilePtr.Close()
-
-	_, _ = msgFilePtr.WriteString(commitMsg)
-	_, _ = msgFilePtr.WriteString("|")
-	_, _ = msgFilePtr.WriteString(time.Now().Format(vxTimeFormat))
-
-	return nil
-}
-
 func runCommitCommand(trackedFilePath, msg string) error {
-	dirCount, err := getNumberOfChildrenDir(vxCommitDirName)
+	dirCount, err := getNumberOfChildrenDir(vxCommitDirPath)
 	if err != nil {
 		return err
 	}
 
-	newCommitDirName := filepath.Join(vxCommitDirName, fmt.Sprintf("v%d", dirCount+1))
+	newCommitDirName := filepath.Join(vxCommitDirPath, fmt.Sprintf("v%d", dirCount+1))
 	err = createCommitMetadataFile(newCommitDirName, msg)
 	if err != nil {
 		return err
@@ -65,20 +52,14 @@ func runCommitCommand(trackedFilePath, msg string) error {
 	}
 
 	for _, file := range fileNameToMetadata {
-		firstCommitFilePath := filepath.Join(vxFirstCommitDirName, file.Name)
-		destCommitFilePath := filepath.Join(newCommitDirName, file.Name)
+		destCommitFilePath := filepath.Join(newCommitDirName, file.Path)
 
-		exist, _ := checkPathExists(firstCommitFilePath)
-		if exist {
-			// TODO: Instead of new copy of the fresh file, we can copy only changes and apply them
-		}
 		destinationFilePtr, _ := createNestedFile(destCommitFilePath)
-		originalFilePtr, _ := os.Open(file.Name)
+		originalFilePtr, _ := os.Open(file.Path)
 		_, _ = io.Copy(destinationFilePtr, originalFilePtr)
 
 		originalFilePtr.Close()
 		destinationFilePtr.Close()
-
 	}
 
 	stagingFilePtr, _ := openFile(stagingAreaFilePath)
@@ -87,4 +68,18 @@ func runCommitCommand(trackedFilePath, msg string) error {
 	err = clearFileContent(stagingFilePtr)
 
 	return err
+}
+
+func createCommitMetadataFile(commitDirName, commitMsg string) error {
+	msgFilePtr, err := createNestedFile(filepath.Join(commitDirName, vxCommitMetadataFileName))
+	if err != nil {
+		return err
+	}
+	defer msgFilePtr.Close()
+
+	_, _ = msgFilePtr.WriteString(commitMsg)
+	_, _ = msgFilePtr.WriteString(separator)
+	_, _ = msgFilePtr.WriteString(time.Now().Format(vxTimeFormat))
+
+	return nil
 }

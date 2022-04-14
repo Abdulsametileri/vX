@@ -6,29 +6,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	testTrackedFile = "testdata/test_tracked.txt"
-)
-
-func Test_runAddCommand(t *testing.T) {
-	files := []string{"testdata/z.go"}
-	err := runAddCommand(statusFilePath, files)
-	assert.Nil(t, err)
-}
-
 func Test_CreateFileNameToModificationMap(t *testing.T) {
-	expectedMap := fileNameToMetadataMap{
-		"go.mod": fileMetadata{
-			Status:           "Created",
-			ModificationTime: "2022-04-12 12:35:01.344508354 +0300 +03",
-		},
-		"README.md": fileMetadata{
-			Status:           "Created",
-			ModificationTime: "2022-04-12 12:51:16.579300203 +0300 +03",
-		},
+	lines := []string{
+		"testdata/a2.txt|2022-04-13 06:58:03|Created",
+		"testdata/example/example.go|2022-04-13 07:41:26|Created",
+		"testdata/staging-area.txt|2022-04-14 05:42:15|Created",
+		"testdata/status.txt|2022-04-14 05:42:15|Created",
+		"testdata/z.go|2022-04-14 05:11:04|Created",
+		"README.md|2022-04-14 05:42:11|Created",
+		"testdata/a1.txt|2022-04-13 06:58:03|Created",
+		"README.md|2022-04-14 05:49:09|Updated",
+	}
+	expectedMap := make(filePathToMetadataMap)
+	for _, line := range lines {
+		fm := extractFileMetadataFromLine(line)
+		expectedMap[fm.Path] = fm
 	}
 
-	m, err := createFileNameToMetadataMap(testTrackedFile)
+	m, err := createFileNameToMetadataMap("testdata/staging-area.txt")
 	assert.Nil(t, err)
 	assert.Equal(t, expectedMap, m)
 }

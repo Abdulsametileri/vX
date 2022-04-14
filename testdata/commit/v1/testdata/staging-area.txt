@@ -1,7 +1,8 @@
-README.md|2022-04-14 05:49:09|Updated
-testdata/a1.txt|2022-04-13 06:58:03|Created
 testdata/a2.txt|2022-04-13 06:58:03|Created
 testdata/example/example.go|2022-04-13 07:41:26|Created
 testdata/staging-area.txt|2022-04-14 05:42:15|Created
 testdata/status.txt|2022-04-14 05:42:15|Created
 testdata/z.go|2022-04-14 05:11:04|Created
+README.md|2022-04-14 05:42:11|Created
+testdata/a1.txt|2022-04-13 06:58:03|Created
+README.md|2022-04-14 05:49:09|Updated
