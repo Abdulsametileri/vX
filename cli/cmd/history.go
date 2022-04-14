@@ -12,6 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	MsgEmptyCommitHistory = "No commits yet!"
+)
+
 func init() {
 	rootCmd.AddCommand(historyCmd)
 }
@@ -54,7 +58,7 @@ func runHistoryCommand(writer io.Writer, commitDirName string) error {
 // Display Format: | Commit Message | Commit Date |
 func displayHistory(writer io.Writer, history []commitHistory) {
 	if len(history) == 0 {
-		color.Green("No commits yet!")
+		color.Green(MsgEmptyCommitHistory)
 		return
 	}
 

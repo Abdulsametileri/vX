@@ -24,37 +24,38 @@ var checkoutCmd = &cobra.Command{
 	Short:   "This allows you to move specified commit version",
 	Example: "vx checkout v2",
 	RunE: func(_ *cobra.Command, args []string) error {
-		return runCheckoutCommand(args)
+		return runCheckoutCommand(vxCheckoutDirPath, vxCommitDirPath, args)
 	},
 }
 
-func runCheckoutCommand(args []string) error {
+func runCheckoutCommand(checkoutDirPath, commitDirPath string, args []string) error {
 	if err := checkCommitVersionIsSpecified(args); err != nil {
 		return err
 	}
 
 	commitVersion := args[0]
 
-	if valid, err := isValidCommitVersion(commitVersion); err != nil {
+	if valid, err := isValidCommitVersion(commitDirPath, commitVersion); err != nil {
 		return err
 	} else if !valid {
 		return ErrCommitVersionNotValid
 	}
 
-	if exist, err := isCheckoutFolderAlreadyExist(commitVersion); err != nil {
+	checkoutFilePath := filepath.Join(checkoutDirPath, commitVersion)
+
+	if exist, err := isCheckoutFolderAlreadyExist(checkoutFilePath); err != nil {
 		return err
 	} else if exist { // checkout version folder already exist no need to do operation
 		return nil
 	}
 
-	checkoutFilePath := filepath.Join(vxCheckoutDirPath, commitVersion)
 	if err := createDirectory(checkoutFilePath); err != nil {
 		return err
 	}
 
 	var commands []string
 
-	dirCount, err := getNumberOfChildrenDir(vxCommitDirPath)
+	dirCount, err := getNumberOfChildrenDir(commitDirPath)
 	if err != nil {
 		return err
 	}
@@ -89,8 +90,8 @@ func checkCommitVersionIsSpecified(args []string) error {
 	return nil
 }
 
-func isValidCommitVersion(commitVersion string) (bool, error) {
-	dir, err := os.ReadDir(vxCommitDirPath)
+func isValidCommitVersion(commitDirPath, commitVersion string) (bool, error) {
+	dir, err := os.ReadDir(commitDirPath)
 	if err != nil {
 		return false, err
 	}

@@ -1,6 +1,6 @@
 # vX
 
-**vX** is a very basic version control system to understand the idea of event sourcing.
+**vX** is a very basic version control system.
 
 # vX Commands
 

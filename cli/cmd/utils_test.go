@@ -27,3 +27,9 @@ func Test_checkDirectoryExists(t *testing.T) {
 		assert.Nil(t, err)
 	})
 }
+
+func Test_getNumberOfChildrenDir(t *testing.T) {
+	dirCount, err := getNumberOfChildrenDir("testdata/commit")
+	assert.Nil(t, err)
+	assert.Equal(t, 2, dirCount)
+}

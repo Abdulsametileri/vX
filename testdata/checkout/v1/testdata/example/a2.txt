@@ -1,0 +1,7 @@
+package vX
+
+func deneme()  {
+    fmt.Println("heyy2")
+    fmt.Println("heyy3")
+    fmt.Println("heyy4")
+}
