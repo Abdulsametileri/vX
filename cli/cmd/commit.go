@@ -41,7 +41,7 @@ func runCommitCommand(trackedFilePath, msg string) error {
 	}
 
 	newCommitDirName := filepath.Join(vxCommitDirPath, fmt.Sprintf("v%d", dirCount+1))
-	err = createCommitMetadataFile(newCommitDirName, msg)
+	err = createCommitMetadataFile(newCommitDirName, msg, time.Now())
 	if err != nil {
 		return err
 	}
@@ -70,16 +70,14 @@ func runCommitCommand(trackedFilePath, msg string) error {
 	return err
 }
 
-func createCommitMetadataFile(commitDirName, commitMsg string) error {
+func createCommitMetadataFile(commitDirName, commitMsg string, commitDate time.Time) error {
 	msgFilePtr, err := createNestedFile(filepath.Join(commitDirName, vxCommitMetadataFileName))
 	if err != nil {
 		return err
 	}
 	defer msgFilePtr.Close()
 
-	_, _ = msgFilePtr.WriteString(commitMsg)
-	_, _ = msgFilePtr.WriteString(separator)
-	_, _ = msgFilePtr.WriteString(time.Now().Format(vxTimeFormat))
+	_, _ = msgFilePtr.WriteString(toFormatCommitMetadata(commitMsg, commitDate))
 
 	return nil
 }

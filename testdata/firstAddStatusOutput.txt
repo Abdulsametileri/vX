@@ -1,0 +1,10 @@
++-------------------------------+---------+-------------------------------+
+| [1;33m          FILE NAME          [0m | [1;33mSTATUS [0m | [1;33m   LAST MODIFICATION TIME    [0m |
++-------------------------------+---------+-------------------------------+
+| testdata/example/z.go         | [1;32mCreated[0m | 0001-01-01 00:00:00 +0000 UTC |
+| testdata/example/src/hello.js | [1;32mCreated[0m | 0001-01-01 00:00:00 +0000 UTC |
+| testdata/example/example.go   | [1;32mCreated[0m | 0001-01-01 00:00:00 +0000 UTC |
+| testdata/example/a2.txt       | [1;32mCreated[0m | 0001-01-01 00:00:00 +0000 UTC |
+| testdata/example/a1.txt       | [1;32mCreated[0m | 0001-01-01 00:00:00 +0000 UTC |
+| README.md                     | [1;32mCreated[0m | 0001-01-01 00:00:00 +0000 UTC |
++-------------------------------+---------+-------------------------------+

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 const (
@@ -10,14 +11,27 @@ const (
 )
 
 func (f *fileMetadata) toFormatFileMetadataForFile() string {
+	mTime := f.ModificationTime
+	if UseDefaultTime {
+		mTime = "0001-01-01 00:00:00 +0000 UTC"
+	}
+
 	return fmt.Sprintf(
 		"%s%s%s%s%s\n",
 		f.Path,
 		separator,
-		f.ModificationTime,
+		mTime,
 		separator,
 		string(f.Status),
 	)
+}
+
+func toFormatCommitMetadata(commitMsg string, commitDate time.Time) string {
+	cDate := commitDate.Format(vxTimeFormat)
+	if UseDefaultTime {
+		cDate = "0001-01-01 00:00:00 +0000 UTC"
+	}
+	return fmt.Sprintf("%s%s%s", commitMsg, separator, cDate)
 }
 
 func getDirNameUsingVersion(versionNo int) string {

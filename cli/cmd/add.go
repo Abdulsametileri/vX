@@ -40,7 +40,7 @@ func runAddCommand(stagingAreaFilePath string, filePaths []string) error {
 	defer stagingFilePtr.Close()
 
 	// we need to truncate status folder in order to catch overwrite file status
-	if err := clearFileContent(statusFilePtr); err != nil {
+	if err = clearFileContent(statusFilePtr); err != nil {
 		return err
 	}
 
@@ -111,7 +111,7 @@ func createFileNameToMetadataMap(filePath string) (filePathToMetadataMap, error)
 		fileNameToModification[fm.Path] = fm
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return nil, err
 	}
 
