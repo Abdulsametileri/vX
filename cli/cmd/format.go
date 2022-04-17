@@ -7,13 +7,14 @@ import (
 )
 
 const (
-	separator = "|"
+	separator   = "|"
+	defaultTime = "0001-01-01 00:00:00 +0000 UTC"
 )
 
 func (f *fileMetadata) toFormatFileMetadataForFile() string {
 	mTime := f.ModificationTime
 	if UseDefaultTime {
-		mTime = "0001-01-01 00:00:00 +0000 UTC"
+		mTime = defaultTime
 	}
 
 	return fmt.Sprintf(
@@ -29,7 +30,7 @@ func (f *fileMetadata) toFormatFileMetadataForFile() string {
 func toFormatCommitMetadata(commitMsg string, commitDate time.Time) string {
 	cDate := commitDate.Format(vxTimeFormat)
 	if UseDefaultTime {
-		cDate = "0001-01-01 00:00:00 +0000 UTC"
+		cDate = defaultTime
 	}
 	return fmt.Sprintf("%s%s%s", commitMsg, separator, cDate)
 }

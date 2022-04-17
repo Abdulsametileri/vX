@@ -79,7 +79,3 @@ checkoutTo v2
 checkFilesMatch '.vx/checkout/v2'
 
 echo "Success 🥳"
-
-# tree -s ".vx/commit/v1" > testdata/firstCommitTree.txt
-# cksum "$1" | awk '{print $1, $2}
-# md5deep -rl .vx/commit/v1

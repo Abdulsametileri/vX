@@ -19,7 +19,21 @@ unit-coverage-html:
 	make unit-test
 	go tool cover -html=unit_coverage.out -o unit_coverage.html
 
+## before-commit: run golangci lint and unit tests before commit
+.PHONY: before-commit
+before-commit: lint unit-test
+
 ## build-cli: build the cli application
 .PHONY: build-cli
 build-cli:
 	go build -o vx cli/main.go
+
+## precommit-install: install pre-commit scripts to .git/hooks
+.PHONY: precommit-install
+precommit-install:
+	pre-commit install
+
+## precommit-run: runs pre-commit scripts without commiting the changes
+.PHONY: precommit-run
+precommit-run:
+	pre-commit run --all-files
