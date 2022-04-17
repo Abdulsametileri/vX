@@ -37,32 +37,22 @@ checkoutTo() {
 
 checkEmptyStatus() {
   emptyStatusOut="No changes on staging area!"
-  if [[ "$(status)" == "$emptyStatusOut" ]]; then
-    echo "String is empty"
-  else
+  if [[ "$(status)" != "$emptyStatusOut" ]]; then
     echoerr "ERROR: '$(status)' cannot equal to '$emptyStatusOut'"
-    exit 1
   fi
 }
 checkStatusAfterAdding() {
-  if [[ "$(status)" == $(cat "$1") ]]; then
-    :
-  else
+  if [[ "$(status)" != $(cat "$1") ]]; then
     echoerr "ERROR: '$(status)' cannot match with '$1"
   fi
 }
 checkFilesMatch() {
-  if [[ $(md5deep -rl "$1" | sort) == $(cat ${md5Files["$1"]}) ]]
-  then
-    :
-  else
+  if [[ $(md5deep -rl "$1" | sort) != $(cat ${md5Files["$1"]}) ]]; then
     echoerr "ERROR: ($1).md5 didn't match"
   fi
 }
 checkHistoryAfterApplyingAllCommits() {
-  if [[ "$(history)" == $(cat "testdata/historyAfterAllCommits.txt") ]]; then
-    :
-  else
+  if [[ "$(history)" != $(cat "testdata/historyAfterAllCommits.txt") ]]; then
     echoerr "ERROR: '$(history)' cannot match with 'testdata/historyAfterAllCommits.txt'"
   fi
 }
@@ -88,6 +78,7 @@ checkFilesMatch '.vx/checkout/v1'
 checkoutTo v2
 checkFilesMatch '.vx/checkout/v2'
 
+echo "Success 🥳"
 
 # tree -s ".vx/commit/v1" > testdata/firstCommitTree.txt
 # cksum "$1" | awk '{print $1, $2}
