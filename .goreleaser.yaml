@@ -29,3 +29,12 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  - tap:
+      owner: Abdulsametileri
+      name: homebrew-tap
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    folder: Formula
+    description: "vX is a basic version control system"
+    install: |
+      bin.install "vx"
