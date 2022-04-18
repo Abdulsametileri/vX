@@ -2,14 +2,12 @@ package cli
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	changeWorkingDirectoryToRootDir()
 	changeGlobalTimeToUTC()
 }
 
@@ -27,13 +25,6 @@ func init() {
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf("Failed to execute command. Reason: %#v", err)
-	}
-}
-
-func changeWorkingDirectoryToRootDir() {
-	err := os.Chdir("../../..")
-	if err != nil {
-		panic(err)
 	}
 }
 

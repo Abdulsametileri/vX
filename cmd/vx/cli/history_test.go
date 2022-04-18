@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	_ "github.com/Abdulsametileri/vX/testing"
 	"github.com/acarl005/stripansi"
 	"github.com/stretchr/testify/assert"
 )

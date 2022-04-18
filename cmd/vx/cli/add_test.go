@@ -3,6 +3,7 @@ package cli
 import (
 	"testing"
 
+	_ "github.com/Abdulsametileri/vX/testing"
 	"github.com/stretchr/testify/assert"
 )
 
