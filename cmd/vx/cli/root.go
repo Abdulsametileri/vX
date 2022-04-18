@@ -3,8 +3,6 @@ package cli
 import (
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -33,8 +31,7 @@ func Execute() {
 }
 
 func changeWorkingDirectoryToRootDir() {
-	_, filename, _, _ := runtime.Caller(0)
-	err := os.Chdir(filepath.Join(filepath.Dir(filename), "..", "..", ".."))
+	err := os.Chdir("../../..")
 	if err != nil {
 		panic(err)
 	}
