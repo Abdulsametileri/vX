@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"log"
@@ -34,7 +34,7 @@ func Execute() {
 
 func changeWorkingDirectoryToRootDir() {
 	_, filename, _, _ := runtime.Caller(0)
-	err := os.Chdir(filepath.Join(filepath.Dir(filename), "..", ".."))
+	err := os.Chdir(filepath.Join(filepath.Dir(filename), "..", "..", ".."))
 	if err != nil {
 		panic(err)
 	}

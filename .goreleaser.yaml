@@ -5,7 +5,7 @@ builds:
   -
     id: vx
     binary: vx
-    main: ./cli
+    main: ./cmd/vx
     env:
       - CGO_ENABLED=0
     goos:

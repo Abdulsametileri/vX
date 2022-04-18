@@ -26,7 +26,7 @@ before-commit: lint unit-test
 ## build-cli: build the cli application
 .PHONY: build-cli
 build-cli:
-	go build -o vx cli/main.go
+	go build -o vx cmd/vx/main.go
 
 ## precommit-install: install pre-commit scripts to .git/hooks
 .PHONY: precommit-install

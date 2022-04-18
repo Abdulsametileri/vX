@@ -7,7 +7,7 @@ md5Files[".vx/commit/v2"]="testdata/vxcommitv2.md5"
 md5Files[".vx/checkout/v1"]="testdata/vxcheckoutv1.md5"
 md5Files[".vx/checkout/v2"]="testdata/vxcheckoutv2.md5"
 
-echoerr() { echo "$@" 1>&2; }
+echoerr() { echo "$@" 1>&2; exit 1; }
 
 buildCli() {
   make build-cli
@@ -65,7 +65,7 @@ checkStatusAfterAdding "testdata/firstAddStatusOutput.txt"
 commitAs "first commit"
 checkFilesMatch '.vx/commit/v1'
 
-add Makefile
+add testdata/Makefile
 checkStatusAfterAdding 'testdata/secondAddStatusOutput.txt'
 commitAs "second commit"
 checkFilesMatch '.vx/commit/v2'
