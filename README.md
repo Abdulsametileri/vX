@@ -6,6 +6,16 @@
 
 [![asciicast](https://asciinema.org/a/487303.svg)](https://asciinema.org/a/487303)
 
+# Installation
+
+## Brew
+
+`brew install abdulsametileri/tap/vx`
+
+## Golang
+
+`go install github.com/Abdulsametileri/vX/cmd/vx@latest`
+
 # vX Commands
 
 All commands: `init`, `add`, `status`, `commit`, `checkout`, `history`
